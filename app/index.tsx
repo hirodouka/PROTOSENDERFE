@@ -2,20 +2,25 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Package, HelpCircle, Bell } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const logoImg = require('./assets/logo.png');
+const logoImg = require('../assets/logo.png');
 const sendParcelIcon = { uri: "https://i.imgur.com/a6gHhtu.png" };
 const trackPackageIcon = { uri: "https://i.imgur.com/HHNarFY.png" };
 const historyIcon = { uri: "https://i.imgur.com/4Xgmx8D.png" };
 const rateReviewIcon = { uri: "https://i.imgur.com/pvzfoIz.png" };
 
 export default function App() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Image source={logoImg} style={styles.logo} resizeMode="contain" />
 
         <View style={styles.headerActions}>
@@ -40,10 +45,10 @@ export default function App() {
         </Text>
 
         <View style={styles.grid}>
-          <ActionCard image={sendParcelIcon} title="Send Parcel" desc="Book a delivery" accentColor="rgba(253, 184, 51, 0.1)" />
-          <ActionCard image={trackPackageIcon} title="Track Package" desc="Live tracking" accentColor="rgba(84, 160, 204, 0.1)" />
-          <ActionCard image={historyIcon} title="History" desc="Past deliveries" accentColor="rgba(57, 181, 168, 0.1)" />
-          <ActionCard image={rateReviewIcon} title="Rate & Review" desc="Give feedback" accentColor="rgba(166, 220, 214, 0.2)" />
+          <ActionCard image={sendParcelIcon} title="Send Parcel" desc="Book a delivery" accentColor="rgba(253, 184, 51, 0.1)" onPress={() => router.push('/send-parcel')} />
+          <ActionCard image={trackPackageIcon} title="Track Package" desc="Live tracking" accentColor="rgba(84, 160, 204, 0.1)" onPress={() => router.push('/track-package')} />
+          <ActionCard image={historyIcon} title="History" desc="Past deliveries" accentColor="rgba(57, 181, 168, 0.1)" onPress={() => router.push('/history')} />
+          <ActionCard image={rateReviewIcon} title="Rate & Review" desc="Give feedback" accentColor="rgba(166, 220, 214, 0.2)" onPress={() => router.push('/rate-review')} />
         </View>
 
         {/* Active Deliveries Section */}
@@ -64,17 +69,12 @@ export default function App() {
 }
 
 // Sub-components
-function ActionCard({ image, title, desc, accentColor }) {
+function ActionCard({ image, title, desc, accentColor, onPress }: any) {
   return (
-    <TouchableOpacity style={styles.actionCard}>
-      <View style={[styles.actionCardBg, { backgroundColor: accentColor }]} />
-      
+    <TouchableOpacity style={[styles.actionCard, { backgroundColor: accentColor }]} onPress={onPress} activeOpacity={0.85}>
       {image && (
-        <View style={styles.actionCardImgContainer}>
-          <Image source={image} style={styles.fullImg} resizeMode="contain" />
-        </View>
+        <Image source={image} style={styles.actionCardImg} resizeMode="contain" />
       )}
-
       <View style={styles.actionCardContent}>
         <View style={styles.actionCardIndicator} />
         <Text style={styles.actionCardTitle}>{title}</Text>
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#F0F9F8'
   },
   header: {
-    height: 100, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57, 181, 168, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: 50, zIndex: 50
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57, 181, 168, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 50
   },
   logo: {
     height: 32, width: 96
@@ -147,19 +147,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 24, marginBottom: 32
   },
   actionCard: {
-    flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', width: '47%', height: 144, padding: 16, backgroundColor: 'white', borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.15)', borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 2, zIndex: 1
+    width: '47%',
+    height: 160,
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(57, 181, 168, 0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 3,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    paddingBottom: 14,
+    overflow: 'hidden',
   },
-  actionCardBg: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 24, zIndex: 0
-  },
-  actionCardImgContainer: {
-    position: 'absolute', top: -24, left: '50%', marginLeft: -40, width: 80, height: 80, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, zIndex: 10
-  },
-  fullImg: {
-    width: '100%', height: '100%'
+  actionCardImg: {
+    width: 88,
+    height: 88,
   },
   actionCardContent: {
-    alignItems: 'center', width: '100%', marginTop: 'auto', zIndex: 10
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 8,
   },
   actionCardIndicator: {
     width: 24, height: 4, borderRadius: 2, backgroundColor: 'rgba(57, 181, 168, 0.3)', marginBottom: 8
