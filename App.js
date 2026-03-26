@@ -1,6 +1,7 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { Package, HelpCircle, Bell, Truck, Gift, AlertCircle, LogOut } from 'lucide-react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Package, HelpCircle, Bell } from 'lucide-react-native';
 
 const logoImg = require('./assets/logo.png');
 const sendParcelIcon = { uri: "https://i.imgur.com/a6gHhtu.png" };
@@ -10,53 +11,53 @@ const rateReviewIcon = { uri: "https://i.imgur.com/pvzfoIz.png" };
 
 export default function App() {
   return (
-    <View className="flex-1 bg-[#F0F9F8]">
+    <View style={styles.container}>
       <StatusBar style="auto" />
       
       {/* Header */}
-      <View className="h-20 flex-row items-center justify-between px-6 border-b border-[#39B5A8]/10 bg-white/80 shrink-0 pt-8 z-50">
-        <Image source={logoImg} className="h-8 w-24" resizeMode="contain" />
+      <View style={styles.header}>
+        <Image source={logoImg} style={styles.logo} resizeMode="contain" />
 
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity className="relative flex items-center justify-center w-10 h-10 rounded-full border border-[#39B5A8]/20">
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.iconBtn}>
             <Bell size={20} color="#39B5A8" />
-            <View className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full items-center justify-center border-2 border-white">
-              <Text className="text-white text-[10px] font-black">2</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>2</Text>
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity className="p-2 rounded-xl border border-[#39B5A8]/20">
+          <TouchableOpacity style={styles.iconBtnSecondary}>
             <HelpCircle size={20} color="#39B5A8" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView className="flex-1 w-full px-4 pt-6">
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
         
         {/* Navigation Section */}
-        <Text className="text-[14px] font-bold text-[#39B5A8] uppercase tracking-widest mb-6">
+        <Text style={styles.sectionHeader}>
           Navigation Menu
         </Text>
 
-        <View className="flex-row flex-wrap justify-between gap-y-6 mb-8">
-          <ActionCard image={sendParcelIcon} title="Send Parcel" desc="Book a delivery" accentColor="bg-[#FDB833]/10" />
-          <ActionCard image={trackPackageIcon} title="Track Package" desc="Live tracking" accentColor="bg-[#54A0CC]/10" />
-          <ActionCard image={historyIcon} title="History" desc="Past deliveries" accentColor="bg-[#39B5A8]/10" />
-          <ActionCard image={rateReviewIcon} title="Rate & Review" desc="Give feedback" accentColor="bg-[#A6DCD6]/20" />
+        <View style={styles.grid}>
+          <ActionCard image={sendParcelIcon} title="Send Parcel" desc="Book a delivery" accentColor="rgba(253, 184, 51, 0.1)" />
+          <ActionCard image={trackPackageIcon} title="Track Package" desc="Live tracking" accentColor="rgba(84, 160, 204, 0.1)" />
+          <ActionCard image={historyIcon} title="History" desc="Past deliveries" accentColor="rgba(57, 181, 168, 0.1)" />
+          <ActionCard image={rateReviewIcon} title="Rate & Review" desc="Give feedback" accentColor="rgba(166, 220, 214, 0.2)" />
         </View>
 
         {/* Active Deliveries Section */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-black text-[#041614]">Active Deliveries</Text>
+        <View style={styles.deliveriesHeader}>
+          <Text style={styles.deliveriesTitle}>Active Deliveries</Text>
           <TouchableOpacity>
-            <Text className="text-[#39B5A8] font-bold text-[12px]">View All</Text>
+            <Text style={styles.viewAllBtn}>View All</Text>
           </TouchableOpacity>
         </View>
 
-        <DeliveryItem id="PKS-2024-001" location="Makati City" time="15 mins away" status="In Transit" statusClass="text-[#54A0CC] bg-[#54A0CC]/10" />
-        <DeliveryItem id="PKS-2024-002" location="Quezon City" time="30 mins away" status="Out for Delivery" statusClass="text-[#FDB833] bg-[#FDB833]/10" />
+        <DeliveryItem id="PKS-2024-001" location="Makati City" time="15 mins away" status="In Transit" statusColor="#54A0CC" statusBg="rgba(84, 160, 204, 0.1)" />
+        <DeliveryItem id="PKS-2024-002" location="Quezon City" time="30 mins away" status="Out for Delivery" statusColor="#FDB833" statusBg="rgba(253, 184, 51, 0.1)" />
         
-        <View className="h-10"></View>
+        <View style={styles.spacer} />
       </ScrollView>
     </View>
   );
@@ -65,45 +66,150 @@ export default function App() {
 // Sub-components
 function ActionCard({ image, title, desc, accentColor }) {
   return (
-    <TouchableOpacity className="relative flex-col items-center justify-end w-[47%] h-36 p-4 bg-white border border-[#39B5A8]/15 rounded-3xl shadow-sm overflow-visible">
-      <View className={`absolute inset-0 opacity-10 rounded-3xl ${accentColor}`} />
+    <TouchableOpacity style={styles.actionCard}>
+      <View style={[styles.actionCardBg, { backgroundColor: accentColor }]} />
       
       {image && (
-        <View className="absolute -top-6 left-1/2 -ml-10 w-20 h-20 shadow-lg">
-          <Image source={image} className="w-full h-full" resizeMode="contain" />
+        <View style={styles.actionCardImgContainer}>
+          <Image source={image} style={styles.fullImg} resizeMode="contain" />
         </View>
       )}
 
-      <View className="items-center w-full mt-auto">
-        <View className="w-6 h-1 rounded-full bg-[#39B5A8]/30 mb-2" />
-        <Text className="text-[#041614] font-black text-xs">{title}</Text>
-        <Text className="text-gray-400 text-[10px] font-bold uppercase mt-1">{desc}</Text>
+      <View style={styles.actionCardContent}>
+        <View style={styles.actionCardIndicator} />
+        <Text style={styles.actionCardTitle}>{title}</Text>
+        <Text style={styles.actionCardDesc}>{desc}</Text>
       </View>
     </TouchableOpacity>
   );
 }
 
-function DeliveryItem({ id, location, time, status, statusClass }) {
+function DeliveryItem({ id, location, time, status, statusColor, statusBg }) {
   return (
-    <TouchableOpacity className="bg-white border border-[#39B5A8]/20 rounded-2xl p-4 flex-row items-center justify-between mb-3 shadow-sm">
-      <View className="flex-row items-center gap-4">
-        <View className="w-12 h-12 bg-[#39B5A8]/10 rounded-xl items-center justify-center border border-[#39B5A8]/20">
+    <TouchableOpacity style={styles.deliveryItem}>
+      <View style={styles.deliveryInfoRow}>
+        <View style={styles.deliveryIconBox}>
           <Package size={24} color="#39B5A8" />
         </View>
 
         <View>
-          <Text className="text-[#1A5D56] font-black text-sm">{id}</Text>
-          <Text className="text-slate-500 text-[11px] font-medium mt-1">{location}</Text>
-          <Text className="text-[#39B5A8] text-[10px] font-bold mt-1">{time}</Text>
+          <Text style={styles.deliveryId}>{id}</Text>
+          <Text style={styles.deliveryLoc}>{location}</Text>
+          <Text style={styles.deliveryTime}>{time}</Text>
         </View>
       </View>
 
-      <View className="items-end gap-2">
-        <Text className="text-[10px] text-[#39B5A8]/60 font-black uppercase tracking-widest">Status</Text>
-        <View className={`px-2 py-1 rounded-md ${statusClass}`}>
-          <Text className={`text-[10px] font-black uppercase ${statusClass.split(' ')[0]}`}>{status}</Text>
+      <View style={styles.deliveryStatusCol}>
+        <Text style={styles.statusLabel}>Status</Text>
+        <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
+          <Text style={[styles.statusBadgeText, { color: statusColor }]}>{status}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, backgroundColor: '#F0F9F8'
+  },
+  header: {
+    height: 100, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57, 181, 168, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.8)', paddingTop: 50, zIndex: 50
+  },
+  logo: {
+    height: 32, width: 96
+  },
+  headerActions: {
+    flexDirection: 'row', alignItems: 'center', gap: 16
+  },
+  iconBtn: {
+    alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.2)', position: 'relative'
+  },
+  iconBtnSecondary: {
+    padding: 8, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.2)'
+  },
+  badge: {
+    position: 'absolute', top: -5, right: -5, width: 20, height: 20, backgroundColor: '#ef4444', borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'white', zIndex: 10
+  },
+  badgeText: {
+    color: 'white', fontSize: 10, fontWeight: '900'
+  },
+  scrollContainer: {
+    flex: 1, width: '100%', paddingHorizontal: 16, paddingTop: 24
+  },
+  scrollContent: {
+    paddingBottom: 60
+  },
+  sectionHeader: {
+    fontSize: 14, fontWeight: 'bold', color: '#39B5A8', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 24
+  },
+  grid: {
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 24, marginBottom: 32
+  },
+  actionCard: {
+    flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', width: '47%', height: 144, padding: 16, backgroundColor: 'white', borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.15)', borderRadius: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 2, zIndex: 1
+  },
+  actionCardBg: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 24, zIndex: 0
+  },
+  actionCardImgContainer: {
+    position: 'absolute', top: -24, left: '50%', marginLeft: -40, width: 80, height: 80, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, zIndex: 10
+  },
+  fullImg: {
+    width: '100%', height: '100%'
+  },
+  actionCardContent: {
+    alignItems: 'center', width: '100%', marginTop: 'auto', zIndex: 10
+  },
+  actionCardIndicator: {
+    width: 24, height: 4, borderRadius: 2, backgroundColor: 'rgba(57, 181, 168, 0.3)', marginBottom: 8
+  },
+  actionCardTitle: {
+    color: '#041614', fontWeight: '900', fontSize: 12
+  },
+  actionCardDesc: {
+    color: '#9ca3af', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', marginTop: 4
+  },
+  deliveriesHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16
+  },
+  deliveriesTitle: {
+    fontSize: 18, fontWeight: '900', color: '#041614'
+  },
+  viewAllBtn: {
+    color: '#39B5A8', fontWeight: 'bold', fontSize: 12
+  },
+  deliveryItem: {
+    backgroundColor: 'white', borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.2)', borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 2
+  },
+  deliveryInfoRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 16
+  },
+  deliveryIconBox: {
+    width: 48, height: 48, backgroundColor: 'rgba(57, 181, 168, 0.1)', borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(57, 181, 168, 0.2)'
+  },
+  deliveryId: {
+    color: '#1A5D56', fontWeight: '900', fontSize: 14
+  },
+  deliveryLoc: {
+    color: '#64748b', fontSize: 11, fontWeight: '500', marginTop: 4
+  },
+  deliveryTime: {
+    color: '#39B5A8', fontSize: 10, fontWeight: 'bold', marginTop: 4
+  },
+  deliveryStatusCol: {
+    alignItems: 'flex-end', gap: 8
+  },
+  statusLabel: {
+    fontSize: 10, color: 'rgba(57, 181, 168, 0.6)', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, paddingBottom: 4
+  },
+  statusBadge: {
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6
+  },
+  statusBadgeText: {
+    fontSize: 10, fontWeight: '900', textTransform: 'uppercase'
+  },
+  spacer: {
+    height: 40
+  }
+});
