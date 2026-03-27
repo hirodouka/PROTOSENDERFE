@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, Modal, Switch,
+  StyleSheet, Modal, Switch, Dimensions
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   User, Mail, Phone, MapPin, Calendar, Save,
   Lock, ShieldCheck, Bell, MessageSquare, RefreshCw, X, Eye, EyeOff,
+  ArrowLeft, Camera, Upload, FileCheck
 } from 'lucide-react-native';
-import { CustomerPageHeader } from '../components/CustomerPageHeader';
 
 type TabType = 'profile' | 'discount' | 'preferences';
 
 export default function EditProfile() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
@@ -36,7 +39,7 @@ export default function EditProfile() {
   });
 
   const [passwordData, setPasswordData] = useState({ current: '', new: '' });
-  const [discountIdUploaded] = useState(false);
+  const [discountIdUploaded, setDiscountIdUploaded] = useState(false);
 
   const userInitials = formData.name.trim().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
@@ -55,124 +58,191 @@ export default function EditProfile() {
   };
 
   return (
-    <View style={styles.container}>
-      <CustomerPageHeader title="Profile Settings" subtitle="Edit your account" icon={User as any} onBack={() => router.back()} />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerBack}>
+          <ArrowLeft size={24} color="#39B5A8" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile Settings</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
       {/* Toast */}
       {toast && (
         <View style={styles.toast}><Text style={styles.toastText}>{toast}</Text></View>
       )}
 
-      {/* Avatar + name */}
-      <View style={styles.avatarSection}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>{userInitials}</Text></View>
-        <View>
-          <Text style={styles.avatarName}>{formData.name}</Text>
-          <Text style={styles.avatarRole}>Customer Account</Text>
-        </View>
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabsRow}>
-        {(['profile', 'discount', 'preferences'] as TabType[]).map(tab => (
-          <TouchableOpacity key={tab} style={[styles.tab, activeTab === tab && styles.tabActive]} onPress={() => setActiveTab(tab)}>
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-              {tab === 'discount' ? 'Discount' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Personal Details</Text>
-            <FormInput icon={<User size={18} color="#39B5A8" />} label="Full Name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} />
-            <FormInput icon={<Mail size={18} color="#39B5A8" />} label="Email Address" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} keyboardType="email-address" />
-            <FormInput icon={<Phone size={18} color="#39B5A8" />} label="Phone Number" value={formData.phone} onChange={(v: string) => setFormData({ ...formData, phone: v })} keyboardType="phone-pad" />
-            <FormInput icon={<Calendar size={18} color="#39B5A8" />} label="Birth Date" value={formData.dob} onChange={(v: string) => setFormData({ ...formData, dob: v })} placeholder="YYYY-MM-DD" />
-            <FormInput icon={<MapPin size={18} color="#39B5A8" />} label="Primary Address" value={formData.address} onChange={(v: string) => setFormData({ ...formData, address: v })} />
+      {/* Scroll Content */}
+      <ScrollView 
+        keyboardShouldPersistTaps="handled"
+        style={styles.scrollContainer} 
+        contentContainerStyle={{ padding: 16, paddingBottom: 160 }}
+      >
+        {/* Avatar Card */}
+        <View style={styles.avatarCard}>
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatarBox}>
+              <Text style={styles.avatarText}>{userInitials}</Text>
+            </View>
+            <TouchableOpacity style={styles.cameraBtn} activeOpacity={0.8}>
+              <Camera size={14} color="#fff" />
+            </TouchableOpacity>
           </View>
-        )}
+          <View style={{ flex: 1, marginLeft: 16 }}>
+            <Text style={styles.avatarName}>{formData.name}</Text>
+            <Text style={styles.avatarRole}>Customer Account</Text>
+          </View>
+        </View>
 
-        {/* Discount Tab */}
-        {activeTab === 'discount' && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Special Discount</Text>
-            <Text style={styles.cardSubtitle}>Upload valid ID for automatic discounts on deliveries.</Text>
-            {discountIdUploaded ? (
-              <View style={styles.uploadedBox}>
-                <ShieldCheck size={48} color="#39B5A8" />
-                <Text style={styles.uploadedTitle}>ID Uploaded Successfully</Text>
-                <Text style={styles.uploadedSub}>Pending admin verification.</Text>
+        {/* Tabs */}
+        <View style={styles.tabsRow}>
+          {(['profile', 'discount', 'preferences'] as TabType[]).map(tab => (
+            <TouchableOpacity 
+              key={tab} 
+              style={[styles.tab, activeTab === tab && styles.tabActive]} 
+              onPress={() => setActiveTab(tab)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                {tab === 'discount' ? 'Special Discount' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Main Settings Card */}
+        <View style={styles.mainCard}>
+          
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <View>
+              <Text style={styles.cardTitle}>Personal Details</Text>
+              <View style={styles.formGrid}>
+                <FormInput icon={<User size={18} color="#39B5A8" />} label="Full Name" value={formData.name} onChange={(v: string) => setFormData({ ...formData, name: v })} />
+                <FormInput icon={<Mail size={18} color="#39B5A8" />} label="Email Address" value={formData.email} onChange={(v: string) => setFormData({ ...formData, email: v })} keyboardType="email-address" />
+                <FormInput icon={<Phone size={18} color="#39B5A8" />} label="Phone Number" value={formData.phone} onChange={(v: string) => setFormData({ ...formData, phone: v })} keyboardType="phone-pad" />
+                <FormInput icon={<Calendar size={18} color="#39B5A8" />} label="Birth Date" value={formData.dob} onChange={(v: string) => setFormData({ ...formData, dob: v })} placeholder="dd/mm/yyyy" />
+                <View style={{ marginTop: 2 }}>
+                  <FormInput icon={<MapPin size={18} color="#39B5A8" />} label="Primary Address" value={formData.address} onChange={(v: string) => setFormData({ ...formData, address: v })} />
+                </View>
               </View>
-            ) : (
-              <View style={styles.uploadBox}>
-                <ShieldCheck size={48} color="#ccc" />
-                <Text style={styles.uploadTitle}>Upload ID Document</Text>
-                <Text style={styles.uploadSub}>Supports JPG, PNG or PDF (Max 5MB)</Text>
-                <TouchableOpacity style={styles.uploadBtn} onPress={() => showToast('File picker coming soon!')}>
-                  <Text style={styles.uploadBtnText}>Choose File</Text>
+            </View>
+          )}
+
+          {/* Discount Tab */}
+          {activeTab === 'discount' && (
+            <View>
+              <View style={styles.discountHeader}>
+                <View style={styles.discountIconBox}><FileCheck size={24} color="#39B5A8" /></View>
+                <View>
+                  <Text style={styles.cardTitle}>Special Discount</Text>
+                  <Text style={styles.cardSubtitle}>Upload valid ID for automatic discounts.</Text>
+                </View>
+              </View>
+
+              {discountIdUploaded ? (
+                <View style={styles.uploadedBox}>
+                  <ShieldCheck size={48} color="#39B5A8" style={{ marginBottom: 12 }} />
+                  <Text style={styles.uploadedTitle}>ID Uploaded Successfully</Text>
+                  <Text style={styles.uploadedSub}>Pending admin verification.</Text>
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.uploadBox} activeOpacity={0.7} onPress={() => showToast('Uploading...')}>
+                  <Upload size={48} color="#d1d5db" style={{ marginBottom: 16 }} />
+                  <Text style={styles.uploadTitle}>Tap to Upload ID Document</Text>
+                  <Text style={styles.uploadSub}>Supports JPG, PNG or PDF (Max 5MB)</Text>
                 </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          {/* Preferences Tab */}
+          {activeTab === 'preferences' && (
+            <View>
+              <View style={styles.discountHeader}>
+                <View style={styles.discountIconBox}><Bell size={24} color="#39B5A8" /></View>
+                <View><Text style={styles.cardTitle}>Preferences</Text></View>
               </View>
-            )}
-          </View>
-        )}
+              <View style={{ marginTop: 10 }}>
+                <PrefRow icon={<Mail size={22} color="#39B5A8" />} label="Email Notifications" desc="Booking confirmations and updates via email." value={preferences.emailNotifications} onChange={() => togglePref('emailNotifications')} />
+                <PrefRow icon={<MessageSquare size={22} color="#39B5A8" />} label="SMS Updates" desc="Real-time text alerts for deliveries." value={preferences.smsUpdates} onChange={() => togglePref('smsUpdates')} />
+                <PrefRow icon={<RefreshCw size={22} color="#39B5A8" />} label="Auto-Extend Booking" desc="Automatically extend expiring storage." value={preferences.autoExtend} onChange={() => togglePref('autoExtend')} hideBorder />
+              </View>
+            </View>
+          )}
 
-        {/* Preferences Tab */}
-        {activeTab === 'preferences' && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Preferences</Text>
-            <PrefRow icon={<Mail size={20} color="#39B5A8" />} label="Email Notifications" desc="Booking confirmations via email" value={preferences.emailNotifications} onChange={() => togglePref('emailNotifications')} />
-            <PrefRow icon={<MessageSquare size={20} color="#39B5A8" />} label="SMS Updates" desc="Real-time text alerts for deliveries" value={preferences.smsUpdates} onChange={() => togglePref('smsUpdates')} />
-            <PrefRow icon={<RefreshCw size={20} color="#39B5A8" />} label="Auto-Extend Booking" desc="Automatically extend expiring storage" value={preferences.autoExtend} onChange={() => togglePref('autoExtend')} />
-            <PrefRow icon={<ShieldCheck size={20} color="#39B5A8" />} label="Two-Factor Auth" desc="Extra security layer for your account" value={preferences.twoFactor} onChange={() => setShow2FAModal(true)} />
-          </View>
-        )}
+        </View>
+      </ScrollView>
 
-        {/* Security section */}
-        <View style={styles.securityCard}>
-          <Text style={styles.secTitle}>Security</Text>
-          <TouchableOpacity style={styles.changePassBtn} onPress={() => setShowPasswordModal(true)}>
-            <Lock size={16} color="#39B5A8" />
-            <Text style={styles.changePassText}>Change Password</Text>
+      {/* Fixed Bottom Action Bar */}
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 24) }]}>
+        
+        <View style={styles.twoFASecurityBox}>
+          <View style={styles.twoFARow}>
+            <ShieldCheck size={20} color="#39B5A8" />
+            <Text style={styles.twoFAText}>2FA Security</Text>
+          </View>
+          <Switch trackColor={{ false: '#e5e7eb', true: '#39B5A8' }} thumbColor="#fff" value={preferences.twoFactor} onValueChange={() => setShow2FAModal(true)} />
+        </View>
+
+        <View style={styles.bottomButtonsRow}>
+          <TouchableOpacity 
+            style={styles.btnPassword} 
+            activeOpacity={0.7} 
+            onPress={() => setShowPasswordModal(true)}
+          >
+            <Lock size={18} color="#39B5A8" />
+            <Text style={styles.btnPasswordText}>Password</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.btnSaveFull} 
+            activeOpacity={0.8} 
+            onPress={handleSave}
+          >
+            <Save size={18} color="#fff" />
+            <Text style={styles.btnSaveFullText}>SAVE ALL</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Save button */}
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Save size={18} color="#fff" />
-          <Text style={styles.saveBtnText}>Save Changes</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       {/* Password Modal */}
       <Modal visible={showPasswordModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
+            <View style={styles.modalDragIndicator} />
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Security Update</Text>
-              <TouchableOpacity onPress={() => setShowPasswordModal(false)}><X size={20} color="#555" /></TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowPasswordModal(false)}><X size={24} color="#9ca3af" /></TouchableOpacity>
             </View>
-            <Text style={styles.modalFieldLabel}>Current Password</Text>
-            <View style={styles.passRow}>
-              <TextInput style={{ flex: 1 }} secureTextEntry={!showPass.current} value={passwordData.current} onChangeText={v => setPasswordData({ ...passwordData, current: v })} placeholder="Enter current password" />
-              <TouchableOpacity onPress={() => setShowPass(p => ({ ...p, current: !p.current }))}>
-                {showPass.current ? <EyeOff size={18} color="#aaa" /> : <Eye size={18} color="#aaa" />}
-              </TouchableOpacity>
+            
+            <View style={styles.modalSpace}>
+              <Text style={styles.modalFieldLabel}>CURRENT PASSWORD</Text>
+              <View style={styles.passRow}>
+                <TextInput style={styles.passInput} secureTextEntry={!showPass.current} value={passwordData.current} onChangeText={v => setPasswordData({ ...passwordData, current: v })} />
+                <TouchableOpacity onPress={() => setShowPass(p => ({ ...p, current: !p.current }))}>
+                  {showPass.current ? <EyeOff size={20} color="#9ca3af" /> : <Eye size={20} color="#9ca3af" />}
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalFieldLabel}>NEW PASSWORD</Text>
+              <View style={styles.passRow}>
+                <TextInput style={styles.passInput} secureTextEntry={!showPass.new} value={passwordData.new} onChangeText={v => setPasswordData({ ...passwordData, new: v })} />
+                <TouchableOpacity onPress={() => setShowPass(p => ({ ...p, new: !p.new }))}>
+                  {showPass.new ? <EyeOff size={20} color="#9ca3af" /> : <Eye size={20} color="#9ca3af" />}
+                </TouchableOpacity>
+              </View>
             </View>
-            <Text style={styles.modalFieldLabel}>New Password</Text>
-            <View style={styles.passRow}>
-              <TextInput style={{ flex: 1 }} secureTextEntry={!showPass.new} value={passwordData.new} onChangeText={v => setPasswordData({ ...passwordData, new: v })} placeholder="Enter new password" />
-              <TouchableOpacity onPress={() => setShowPass(p => ({ ...p, new: !p.new }))}>
-                {showPass.new ? <EyeOff size={18} color="#aaa" /> : <Eye size={18} color="#aaa" />}
-              </TouchableOpacity>
-            </View>
+
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowPasswordModal(false)}><Text style={styles.modalCancelText}>Cancel</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.modalSaveBtn} onPress={() => { showToast('Password updated!'); setShowPasswordModal(false); }}>
-                <Text style={styles.modalSaveText}>Update</Text>
+              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShowPasswordModal(false)}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalUpdateBtn} onPress={() => { showToast('Password updated!'); setShowPasswordModal(false); }}>
+                <Text style={styles.modalUpdateText}>Update</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -181,52 +251,70 @@ export default function EditProfile() {
 
       {/* 2FA Modal */}
       <Modal visible={show2FAModal} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+        <View style={styles.modalOverlayCentered}>
+          <View style={styles.modalCardCentered}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Enable 2FA</Text>
-              <TouchableOpacity onPress={() => setShow2FAModal(false)}><X size={20} color="#555" /></TouchableOpacity>
+              <TouchableOpacity onPress={() => setShow2FAModal(false)}><X size={24} color="#9ca3af" /></TouchableOpacity>
             </View>
-            <Text style={styles.modalDesc}>Two-factor authentication adds an extra layer of security. Enable it now?</Text>
+            <Text style={styles.modalDesc}>Two-factor authentication adds an extra layer of security to your account.</Text>
+            
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShow2FAModal(false)}><Text style={styles.modalCancelText}>Cancel</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.modalSaveBtn} onPress={() => {
+              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setShow2FAModal(false)}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalUpdateBtnTop} onPress={() => {
                 togglePref('twoFactor');
                 showToast('2FA enabled!');
                 setShow2FAModal(false);
               }}>
-                <Text style={styles.modalSaveText}>Enable</Text>
+                <Text style={styles.modalUpdateText}>Enable</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
 
+// Sub-components
 function FormInput({ icon, label, value, onChange, keyboardType = 'default', placeholder }: any) {
   return (
     <View style={fi.wrap}>
       <Text style={fi.label}>{label}</Text>
-      <View style={fi.row}>
-        <View style={fi.icon}>{icon}</View>
-        <TextInput style={fi.input} value={value} onChangeText={onChange} keyboardType={keyboardType} placeholder={placeholder || label} />
+      <View style={fi.relative}>
+        <View style={fi.iconBox}>{icon}</View>
+        <TextInput 
+          style={fi.input} 
+          value={value} 
+          onChangeText={onChange} 
+          keyboardType={keyboardType} 
+          placeholder={placeholder} 
+          placeholderTextColor="#9ca3af"
+        />
       </View>
     </View>
   );
 }
+
 const fi = StyleSheet.create({
-  wrap: { marginBottom: 12 },
-  label: { fontSize: 9, fontWeight: '900', color: '#39B5A8', letterSpacing: 1.5, marginBottom: 4 },
-  row: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F9F8', borderRadius: 12, borderWidth: 2, borderColor: 'rgba(57,181,168,0.15)', paddingHorizontal: 12, height: 46 },
-  icon: { marginRight: 10 },
-  input: { flex: 1, fontSize: 14, fontWeight: '700', color: '#041614' },
+  wrap: { marginBottom: 16 },
+  label: { fontSize: 10, fontWeight: '900', color: '#39B5A8', letterSpacing: 1.5, marginBottom: 4, marginLeft: 4 },
+  relative: { position: 'relative', justifyContent: 'center' },
+  iconBox: { position: 'absolute', left: 16, zIndex: 10, opacity: 0.6 },
+  input: { 
+    backgroundColor: '#F0F9F8', borderRadius: 16, height: 48,
+    paddingLeft: 46, paddingRight: 16,
+    fontSize: 14, fontWeight: '700', color: '#041614',
+    borderWidth: 2, borderColor: 'transparent'
+  },
 });
 
-function PrefRow({ icon, label, desc, value, onChange }: any) {
+function PrefRow({ icon, label, desc, value, onChange, hideBorder = false }: any) {
   return (
-    <View style={pr.row}>
+    <View style={[pr.row, hideBorder && { borderBottomWidth: 0 }]}>
       <View style={pr.icon}>{icon}</View>
       <View style={{ flex: 1 }}>
         <Text style={pr.label}>{label}</Text>
@@ -237,53 +325,124 @@ function PrefRow({ icon, label, desc, value, onChange }: any) {
   );
 }
 const pr = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f1f5f9', gap: 14 },
-  icon: {},
-  label: { fontSize: 14, fontWeight: '800', color: '#041614' },
-  desc: { fontSize: 11, color: '#888', marginTop: 2 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', gap: 16 },
+  icon: { marginTop: 2, opacity: 0.9 },
+  label: { fontSize: 15, fontWeight: '900', color: '#041614', letterSpacing: -0.3 },
+  desc: { fontSize: 12, color: '#6b7280', marginTop: 3, fontWeight: '500' },
 });
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F0F9F8' },
-  toast: { backgroundColor: '#1A5D56', marginHorizontal: 16, borderRadius: 12, padding: 12, marginBottom: 4 },
+  header: {
+    height: 64, backgroundColor: 'transparent',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, zIndex: 50
+  },
+  headerBack: { padding: 8, marginLeft: -8 },
+  headerTitle: { fontSize: 18, fontWeight: '900', color: '#041614' },
+  toast: { backgroundColor: '#1A5D56', marginHorizontal: 20, borderRadius: 12, padding: 12 },
   toastText: { color: '#fff', fontWeight: '800', fontSize: 13, textAlign: 'center' },
-  avatarSection: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#fff', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57,181,168,0.1)' },
-  avatar: { width: 60, height: 60, borderRadius: 18, backgroundColor: '#1A5D56', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 22, fontWeight: '900', color: '#fff' },
-  avatarName: { fontSize: 16, fontWeight: '900', color: '#041614' },
-  avatarRole: { fontSize: 11, color: '#39B5A8', fontWeight: '700', marginTop: 2 },
-  tabsRow: { flexDirection: 'row', backgroundColor: '#fff', padding: 4, gap: 4, borderBottomWidth: 1, borderBottomColor: 'rgba(57,181,168,0.1)' },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' },
+  scrollContainer: { flex: 1 },
+  
+  avatarCard: {
+    backgroundColor: '#fff', borderRadius: 24, padding: 20,
+    borderWidth: 1, borderColor: 'rgba(57,181,168,0.1)', shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 2 },
+    flexDirection: 'row', alignItems: 'center', marginBottom: 16
+  },
+  avatarWrap: { position: 'relative' },
+  avatarBox: {
+    width: 68, height: 68, borderRadius: 20, backgroundColor: '#1A5D56',
+    borderWidth: 3, borderColor: '#F0F9F8',
+    alignItems: 'center', justifyContent: 'center'
+  },
+  avatarText: { fontSize: 28, fontWeight: '900', color: '#fff' },
+  cameraBtn: {
+    position: 'absolute', bottom: -4, right: -4,
+    backgroundColor: '#39B5A8', padding: 6, borderRadius: 12,
+    borderWidth: 2, borderColor: '#fff'
+  },
+  avatarName: { fontSize: 20, fontWeight: '900', color: '#041614' },
+  avatarRole: { fontSize: 12, color: '#39B5A8', fontWeight: '800', marginTop: 2 },
+  
+  tabsRow: {
+    flexDirection: 'row', backgroundColor: '#fff', padding: 6, borderRadius: 20,
+    borderWidth: 1, borderColor: 'rgba(57,181,168,0.1)', shadowOpacity: 0.02,
+    marginBottom: 20
+  },
+  tab: { flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
   tabActive: { backgroundColor: '#F0F9F8' },
-  tabText: { fontSize: 11, fontWeight: '800', color: '#aaa' },
+  tabText: { fontSize: 12, fontWeight: '800', color: '#9ca3af' },
   tabTextActive: { color: '#39B5A8' },
-  card: { backgroundColor: '#fff', borderRadius: 20, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(57,181,168,0.12)' },
-  cardTitle: { fontSize: 18, fontWeight: '900', color: '#041614', marginBottom: 4 },
-  cardSubtitle: { fontSize: 12, color: '#888', marginBottom: 16 },
-  uploadedBox: { alignItems: 'center', backgroundColor: '#F0F9F8', borderRadius: 16, padding: 28, borderWidth: 1, borderColor: 'rgba(57,181,168,0.2)' },
-  uploadedTitle: { fontSize: 16, fontWeight: '800', color: '#1A5D56', marginTop: 12 },
-  uploadedSub: { fontSize: 12, color: '#39B5A8', marginTop: 4 },
-  uploadBox: { alignItems: 'center', borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(57,181,168,0.3)', borderRadius: 16, padding: 28, backgroundColor: '#F9FCFC' },
-  uploadTitle: { fontSize: 15, fontWeight: '800', color: '#041614', marginTop: 12 },
-  uploadSub: { fontSize: 11, color: '#aaa', marginTop: 4 },
-  uploadBtn: { marginTop: 16, backgroundColor: '#39B5A8', paddingHorizontal: 28, paddingVertical: 12, borderRadius: 14 },
-  uploadBtnText: { color: '#fff', fontWeight: '800', fontSize: 14 },
-  securityCard: { backgroundColor: '#fff', borderRadius: 20, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(57,181,168,0.12)' },
-  secTitle: { fontSize: 13, fontWeight: '900', color: '#041614', marginBottom: 10 },
-  changePassBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1.5, borderColor: 'rgba(57,181,168,0.2)', borderRadius: 14, padding: 14 },
-  changePassText: { fontSize: 14, fontWeight: '800', color: '#1A5D56' },
-  saveBtn: { backgroundColor: '#39B5A8', borderRadius: 20, height: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, shadowColor: '#39B5A8', shadowOpacity: 0.3, shadowRadius: 12, elevation: 4 },
-  saveBtnText: { color: '#fff', fontWeight: '900', fontSize: 16 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 36 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: '900', color: '#041614' },
-  modalFieldLabel: { fontSize: 10, fontWeight: '900', color: '#39B5A8', letterSpacing: 1.5, marginBottom: 6, marginTop: 12 },
-  passRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F9F8', borderRadius: 12, borderWidth: 2, borderColor: 'rgba(57,181,168,0.15)', paddingHorizontal: 14, height: 48, marginBottom: 4 },
-  modalDesc: { fontSize: 14, color: '#666', lineHeight: 22, marginBottom: 20 },
-  modalActions: { flexDirection: 'row', gap: 10, marginTop: 20 },
-  modalCancelBtn: { flex: 1, height: 48, borderRadius: 14, borderWidth: 2, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center' },
-  modalCancelText: { color: '#888', fontWeight: '800' },
-  modalSaveBtn: { flex: 1, height: 48, borderRadius: 14, backgroundColor: '#041614', alignItems: 'center', justifyContent: 'center' },
-  modalSaveText: { color: '#fff', fontWeight: '800' },
+
+  mainCard: {
+    backgroundColor: '#fff', borderRadius: 28, padding: 24, paddingBottom: 32,
+    borderWidth: 1, borderColor: 'rgba(57,181,168,0.1)', shadowOpacity: 0.05, shadowRadius: 15, shadowOffset: { width: 0, height: 4 },
+  },
+  cardTitle: { fontSize: 22, fontWeight: '900', color: '#041614', marginBottom: 18 },
+  formGrid: { marginTop: 4 },
+
+  discountHeader: { flexDirection: 'row', gap: 12, marginBottom: 4 },
+  discountIconBox: { backgroundColor: '#F0F9F8', padding: 12, borderRadius: 16, height: 48 },
+  cardSubtitle: { fontSize: 13, color: '#6b7280', marginTop: -14, marginBottom: 20, fontWeight: '500' },
+  uploadBox: {
+    alignItems: 'center', borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(57,181,168,0.3)',
+    borderRadius: 24, padding: 32, backgroundColor: '#F9FCFC', marginTop: 8
+  },
+  uploadTitle: { fontSize: 16, fontWeight: '900', color: '#041614', marginTop: 12 },
+  uploadSub: { fontSize: 12, color: '#9ca3af', marginTop: 4, fontWeight: '600' },
+  uploadedBox: {
+    alignItems: 'center', backgroundColor: '#F0F9F8', borderRadius: 24, padding: 32,
+    borderWidth: 1, borderColor: 'rgba(57,181,168,0.2)', marginTop: 8
+  },
+  uploadedTitle: { fontSize: 18, fontWeight: '900', color: '#1A5D56' },
+  uploadedSub: { fontSize: 14, color: '#39B5A8', fontWeight: 'bold', marginTop: 4 },
+
+  bottomBar: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: 'rgba(57,181,168,0.1)',
+    paddingHorizontal: 20, paddingTop: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.06, shadowRadius: 20, elevation: 15
+  },
+  twoFASecurityBox: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: 'rgba(240, 249, 248, 0.4)', borderWidth: 2, borderColor: 'rgba(57,181,168,0.1)',
+    borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 12
+  },
+  twoFARow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  twoFAText: { fontSize: 14, fontWeight: '900', color: '#39B5A8' },
+
+  bottomButtonsRow: { flexDirection: 'row', gap: 10 },
+  btnPassword: {
+    flex: 1, height: 56, backgroundColor: '#fff', borderRadius: 16,
+    borderWidth: 2, borderColor: 'rgba(57,181,168,0.1)',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8
+  },
+  btnPasswordText: { color: '#39B5A8', fontWeight: '900', fontSize: 14 },
+  btnSaveFull: {
+    flex: 1.5, height: 56, backgroundColor: '#39B5A8', borderRadius: 16,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    shadowColor: '#39B5A8', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5
+  },
+  btnSaveFullText: { color: '#fff', fontWeight: '900', fontSize: 14, letterSpacing: 1 },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalCard: { backgroundColor: '#fff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
+  modalDragIndicator: { width: 48, height: 6, backgroundColor: '#e5e7eb', borderRadius: 3, alignSelf: 'center', marginBottom: 16 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  modalTitle: { fontSize: 24, fontWeight: '900', color: '#041614' },
+  modalSpace: { marginTop: 10 },
+  modalFieldLabel: { fontSize: 11, fontWeight: '900', color: '#9ca3af', letterSpacing: 1.5, marginBottom: 8, marginTop: 16 },
+  passRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0F9F8', borderRadius: 16, paddingHorizontal: 16, height: 52 },
+  passInput: { flex: 1, fontSize: 16, fontWeight: '800', color: '#041614' },
+  
+  modalOverlayCentered: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalCardCentered: { backgroundColor: '#fff', borderRadius: 32, padding: 24, width: '90%', maxWidth: 400 },
+  modalDesc: { fontSize: 15, color: '#666', lineHeight: 24, marginBottom: 24 },
+  
+  modalActions: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  modalCancelBtn: { flex: 1, height: 52, borderRadius: 16, borderWidth: 2, borderColor: '#e5e7eb', alignItems: 'center', justifyContent: 'center' },
+  modalCancelText: { color: '#6b7280', fontWeight: '800', fontSize: 15 },
+  modalUpdateBtn: { flex: 1, height: 52, borderRadius: 16, backgroundColor: '#041614', alignItems: 'center', justifyContent: 'center' },
+  modalUpdateBtnTop: { flex: 1, height: 52, borderRadius: 16, backgroundColor: '#39B5A8', alignItems: 'center', justifyContent: 'center' },
+  modalUpdateText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });
