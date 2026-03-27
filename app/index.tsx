@@ -5,6 +5,7 @@ import { Package, HelpCircle, Bell, User, LogOut, Clock, ArrowRight, ChevronRigh
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TutorialModal from '../components/TutorialModal';
+import NotificationModal from '../components/NotificationModal';
 
 const logoImg = require('../assets/logo.png');
 const sendParcelIcon = { uri: "https://i.imgur.com/a6gHhtu.png" };
@@ -18,6 +19,7 @@ export default function App() {
   
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const actionCardsRef = useRef<View>(null);
@@ -63,7 +65,7 @@ export default function App() {
         <Image source={logoImg} style={styles.logo} resizeMode="contain" />
 
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconBtn}>
+          <TouchableOpacity style={styles.iconBtn} onPress={() => setShowNotifications(true)}>
             <Bell size={20} color="#39B5A8" />
             <View style={styles.badge}>
               <Text style={styles.badgeText}>2</Text>
@@ -128,6 +130,8 @@ export default function App() {
         
         <View style={styles.spacer} />
       </ScrollView>
+
+      <NotificationModal isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 }
@@ -212,10 +216,10 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#F0F9F8'
   },
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57, 181, 168, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 50
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(57, 181, 168, 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 50
   },
   logo: {
-    height: 32, width: 96
+    height: 38, width: 114
   },
   headerActions: {
     flexDirection: 'row', alignItems: 'center', gap: 12

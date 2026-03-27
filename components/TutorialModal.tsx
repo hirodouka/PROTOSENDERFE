@@ -155,11 +155,11 @@ export default function TutorialModal({
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       {/* Dim Overlay with Spotlight Cutout */}
-      <View style={[StyleSheet.absoluteFill, { zIndex: 59 }]} pointerEvents="none">
-         <Svg height="100%" width="100%">
+      <View style={{ position: 'absolute', top: 0, left: 0, width: windowWidth, height: windowHeight, zIndex: 59 }} pointerEvents="none">
+         <Svg height={windowHeight} width={windowWidth}>
             <Defs>
-              <Mask id="mask" x="0" y="0" height="100%" width="100%">
-                <Rect height="100%" width="100%" fill="white" />
+              <Mask id="mask" x="0" y="0" height={windowHeight} width={windowWidth}>
+                <Rect height={windowHeight} width={windowWidth} fill="white" />
                 {highlightRect ? (
                   <Rect
                     x={highlightRect.x}
@@ -182,8 +182,8 @@ export default function TutorialModal({
               </Mask>
             </Defs>
             <Rect 
-              height="100%" 
-              width="100%" 
+              height={windowHeight} 
+              width={windowWidth} 
               fill="rgba(4, 22, 20, 0.7)" 
               mask="url(#mask)" 
             />
